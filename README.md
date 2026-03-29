@@ -1,3 +1,5 @@
+A well-structured REST API design project using Next.js 16, Tailwind CSS, Shadcn/UI, and Prisma, following strict code style, testing, and workflow best practices with mock data integration.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
