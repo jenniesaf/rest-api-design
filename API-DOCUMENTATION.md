@@ -419,13 +419,174 @@ price = (100 * days) + (passengers * 15)
 
 ### 📋 Future Considerations
 - [ ] API versioning (/api/v1/...)
-- [ ] Rate limiting
+- [ ] Rate limiting (see recommended pattern below)
 - [ ] Authentication (for lead storage)
 - [ ] Request logging
 - [ ] Response compression
 - [ ] CORS configuration
 - [ ] Pagination (for future inquiry history endpoints)
 - [ ] OpenAPI/Swagger documentation generation
+
+---
+
+## Rate Limiting - Recommended Implementation Pattern
+
+**Best Practice: Middleware + Edge-Compatible Store**
+
+For this project, the recommended approach is:
+
+```
+Middleware (middleware.ts) + Upstash Redis or Vercel KV
+```
+
+### Why This Approach?
+
+✅ **Benefits:**
+1. **Protects ALL API routes** - Blocks abusive requests before they reach business logic
+2. **Edge Runtime** - Runs fast on Vercel's edge network (globally distributed)
+3. **Scalable** - Works in serverless/multi-instance deployments
+4. **Centralized** - One place to configure rate limits for all endpoints
+5. **Industry Standard** - Used by major APIs (Stripe, GitHub, Twitter API)
+
+### Implementation Pattern
+
+**File: `middleware.ts` (root level)**
+```typescript
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+// Configure rate limit (100 requests per hour per IP)
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(100, '1 h'),
+  analytics: true,
+});
+
+export async function middleware(request: NextRequest) {
+  // Only apply to API routes
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const ip = request.ip ?? '127.0.0.1';
+    const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+
+    if (!success) {
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded',
+          details: 'Too many requests. Please try again later.',
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+          },
+        }
+      );
+    }
+
+    // Add rate limit headers to successful responses
+    const response = NextResponse.next();
+    response.headers.set('X-RateLimit-Limit', limit.toString());
+    response.headers.set('X-RateLimit-Remaining', remaining.toString());
+    response.headers.set('X-RateLimit-Reset', reset.toString());
+    return response;
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: '/api/:path*',
+};
+```
+
+**Install dependencies:**
+```bash
+npm install @upstash/ratelimit @upstash/redis
+```
+
+**Environment variables (.env.local):**
+```
+UPSTASH_REDIS_REST_URL=your_upstash_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_token
+```
+
+### Why NOT Other Approaches?
+
+❌ **In-memory Map** 
+- Doesn't work in serverless (data lost between deployments/instances)
+- Not shared across multiple servers
+
+❌ **Database (Prisma/PostgreSQL)**
+- Too slow for rate limiting checks
+- Not edge-compatible
+- Adds unnecessary load to your main database
+
+❌ **Per-route logic**
+- Code duplication across endpoints
+- Requests still hit your API handlers before being rejected
+- Harder to maintain consistent limits
+
+### Rate Limit Headers (Standard)
+
+When rate limiting is implemented, include these headers in ALL responses:
+
+- `X-RateLimit-Limit`: Total allowed requests in the time window
+- `X-RateLimit-Remaining`: Requests remaining in current window
+- `X-RateLimit-Reset`: Unix timestamp when the limit resets
+
+**Example Response Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 1711900800
+```
+
+### Different Limits Per Endpoint (Advanced)
+
+You can configure different limits for different endpoints:
+
+```typescript
+const transferPriceLimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(50, '1 h'), // More restrictive
+});
+
+const locationsLimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(200, '1 h'), // More permissive
+});
+```
+
+### Recommended Limits for This Project
+
+- **GET /api/locations** - 200 requests/hour (mostly static data)
+- **GET /api/service-locations** - 200 requests/hour (mostly static data)
+- **GET /api/day-trips** - 200 requests/hour (mostly static data)
+- **POST /api/transfer-price** - 50 requests/hour (computational)
+- **POST /api/daytrip-price** - 50 requests/hour (computational)
+
+### Testing Rate Limits
+
+```bash
+# Test rate limiting manually
+for i in {1..101}; do curl -X POST http://localhost:3000/api/transfer-price; done
+```
+
+### Production Alternatives
+
+1. **Vercel Built-in Rate Limiting** - Available on Pro/Enterprise plans
+2. **Cloudflare Rate Limiting** - If using Cloudflare as CDN/proxy
+3. **API Gateway** - AWS API Gateway, Azure API Management, etc.
+
+### References
+
+- [Upstash Rate Limiting](https://upstash.com/docs/redis/features/ratelimiting)
+- [Vercel Edge Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
+- [RFC 6585 - HTTP 429 Status Code](https://tools.ietf.org/html/rfc6585#section-4)
 
 ---
 
