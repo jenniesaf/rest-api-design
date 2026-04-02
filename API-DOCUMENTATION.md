@@ -212,10 +212,15 @@ This document describes the REST API endpoints for the Montenegro Trip Calculato
   "error": "Invalid request",
   "details": [
     "date must be in the future",
-    "Minimum 4 passengers required for the selected date (season)",
-    "start location is not valid"
+    "start location is not valid",
+    "Minimum 4 passengers required for the selected date (season)"
   ]
 }
+```
+
+**Note:** The `details` array contains ALL validation errors found in the request. The seasonal passenger minimum message changes based on the date:
+- **April-October:** "Minimum 4 passengers required for the selected date (season)"
+- **November-March:** "Minimum 2 passengers required for the selected date (season)"
 ```
 
 **Error Response Type:**
@@ -315,9 +320,14 @@ This document describes the REST API endpoints for the Montenegro Trip Calculato
   "details": [
     "date must be in the future",
     "days is required and must be at least 1",
-    "Minimum 4 passengers required for the selected date (season)"
+    "Minimum 2 passengers required for the selected date (season)"
   ]
 }
+```
+
+**Note:** The `details` array contains ALL validation errors found in the request. The seasonal passenger minimum message changes based on the date:
+- **April-October:** "Minimum 4 passengers required for the selected date (season)"
+- **November-March:** "Minimum 2 passengers required for the selected date (season)"
 ```
 
 **Error Response Type:**
