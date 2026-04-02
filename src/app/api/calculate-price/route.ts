@@ -64,6 +64,20 @@ export async function POST(request: NextRequest) {
       } else if (!ALL_LOCATIONS.includes(body.end as any)) {
         errors.push("end location is not valid");
       }
+
+      if (body.tripId) {
+        errors.push("tripId should not be provided for transfer service");
+      }
+    }
+
+    if (body.serviceType === "dayTrip") {
+      if (!body.tripId) {
+        errors.push("tripId is required for dayTrip");
+      }
+
+      if (body.start || body.end) {
+        errors.push("start and end locations should not be provided for dayTrip service");
+      }
     }
 
     if (errors.length > 0) {
