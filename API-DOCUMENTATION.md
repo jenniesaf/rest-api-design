@@ -134,18 +134,17 @@ This document describes the REST API endpoints for the Montenegro Trip Calculato
 
 ---
 
-### 4. POST /api/calculate-price
+### 4. POST /api/transfer-price
 
-**Description:** Calculates the price for a transfer or day trip. Returns price for standard transfers or indicates special request needed for unsupported routes.
+**Description:** Calculates the price for a transfer. Returns price for standard transfers or indicates special request needed for unsupported routes.
 
 **Method:** `POST`
 
 **Authentication:** None (will be added when lead collection is implemented)
 
-**Request Body (Transfer):**
+**Request Body:**
 ```json
 {
-  "serviceType": "transfer",
   "date": "2026-04-15",
   "passengers": 4,
   "start": "Podgorica Airport",
@@ -153,50 +152,25 @@ This document describes the REST API endpoints for the Montenegro Trip Calculato
 }
 ```
 
-**Request Body (Day Trip):**
-```json
-{
-  "serviceType": "dayTrip",
-  "date": "2026-04-15",
-  "days": 3,
-  "passengers": 4,
-  "tripId": "day-trip-1"
-}
-```
-
 **Request Type:**
 ```typescript
-type TransferRequest = {
-  serviceType: "transfer";
+{
   date: string; // ISO 8601 format (YYYY-MM-DD)
   passengers: number;
   start: string;
   end: string;
-};
-
-type DayTripRequest = {
-  serviceType: "dayTrip";
-  date: string; // ISO 8601 format (YYYY-MM-DD)
-  days: number;
-  passengers: number;
-  tripId: string;
-};
-
-type CalculatePriceRequest = TransferRequest | DayTripRequest;
+}
 ```
 
 **Validation Rules:**
 
 | Field | Rule |
 |-------|------|
-| `serviceType` | Required. Must be "transfer" or "dayTrip" |
 | `date` | Required. Must be valid future date (ISO 8601) |
-| `days` | Required if serviceType is "dayTrip". Must be >= 1 |
 | `passengers` | Required. Must be >= seasonal minimum |
 | `passengers` (season) | April-October: min 4, November-March: min 2 |
-| `start` | Required for "transfer". Must be in locations list. Must NOT be provided for "dayTrip" |
-| `end` | Required for "transfer". Must be in locations list. Must NOT be provided for "dayTrip" |
-| `tripId` | Required for "dayTrip". Must NOT be provided for "transfer" |
+| `start` | Required. Must be in locations list |
+| `end` | Required. Must be in locations list |
 
 **Response 200 OK (Standard Transfer):**
 ```json
@@ -232,32 +206,14 @@ type CalculatePriceRequest = TransferRequest | DayTripRequest;
 }
 ```
 
-**Response 200 OK (Day Trip):**
-```json
-{
-  "price": 345.00,
-  "currency": "EUR",
-  "details": "Day trip for 3 day(s) with 4 passenger(s)"
-}
-```
-
-**Response Type (Day Trip):**
-```typescript
-{
-  price: number;
-  currency: "EUR";
-  details: string;
-}
-```
-
 **Error Response 400 (Validation Error):**
 ```json
 {
   "error": "Invalid request",
   "details": [
-    "serviceType is required and must be 'transfer' or 'dayTrip'",
     "date must be in the future",
-    "Minimum 4 passengers required for the selected date (season)"
+    "Minimum 4 passengers required for the selected date (season)",
+    "start location is not valid"
   ]
 }
 ```
@@ -266,7 +222,7 @@ type CalculatePriceRequest = TransferRequest | DayTripRequest;
 ```typescript
 {
   error: string;
-  details: string | string[];
+  details: string[];
 }
 ```
 
@@ -289,9 +245,110 @@ type CalculatePriceRequest = TransferRequest | DayTripRequest;
 
 **Future Enhancements:**
 - Store special request inquiries in database with contact info
-- Add authentication for storing user preferences
 - Add email notification for special requests
 - Implement actual pricing algorithm based on distance/route data
+
+---
+
+### 5. POST /api/daytrip-price
+
+**Description:** Calculates the price for a day trip package.
+
+**Method:** `POST`
+
+**Authentication:** None (will be added when lead collection is implemented)
+
+**Request Body:**
+```json
+{
+  "date": "2026-04-15",
+  "days": 3,
+  "passengers": 4,
+  "tripId": "day-trip-1"
+}
+```
+
+**Request Type:**
+```typescript
+{
+  date: string; // ISO 8601 format (YYYY-MM-DD)
+  days: number;
+  passengers: number;
+  tripId: string;
+}
+```
+
+**Validation Rules:**
+
+| Field | Rule |
+|-------|------|
+| `date` | Required. Must be valid future date (ISO 8601) |
+| `days` | Required. Must be >= 1 |
+| `passengers` | Required. Must be >= seasonal minimum |
+| `passengers` (season) | April-October: min 4, November-March: min 2 |
+| `tripId` | Required. Must match an available day trip |
+
+**Response 200 OK:**
+```json
+{
+  "price": 345.00,
+  "currency": "EUR",
+  "details": "Day trip for 3 day(s) with 4 passenger(s)",
+  "tripId": "day-trip-1"
+}
+```
+
+**Response Type:**
+```typescript
+{
+  price: number;
+  currency: "EUR";
+  details: string;
+  tripId: string;
+}
+```
+
+**Error Response 400 (Validation Error):**
+```json
+{
+  "error": "Invalid request",
+  "details": [
+    "date must be in the future",
+    "days is required and must be at least 1",
+    "Minimum 4 passengers required for the selected date (season)"
+  ]
+}
+```
+
+**Error Response Type:**
+```typescript
+{
+  error: string;
+  details: string[];
+}
+```
+
+**Error Response 500 (Server Error):**
+```json
+{
+  "error": "Internal server error",
+  "details": "Error message"
+}
+```
+
+**HTTP Status Codes:**
+- `200` - Success (price calculated)
+- `400` - Bad Request (validation failed)
+- `500` - Internal Server Error
+
+**Caching:** This endpoint should NOT be cached (personalized calculations)
+
+**Rate Limiting:** Consider implementing rate limiting (e.g., 100 requests per IP per hour) to prevent abuse
+
+**Future Enhancements:**
+- Add authentication for storing user preferences
+- Implement actual pricing algorithm based on trip complexity
+- Add trip availability calendar
 
 ---
 
@@ -316,12 +373,12 @@ Any other route combination requires a special request.
 - **November to March:** Minimum 2 passengers
 
 ### Price Calculation (Current Implementation)
-**Transfers:**
+**Transfer Endpoint (/api/transfer-price):**
 ```
 price = 50 (base) + (1.5 * 20) (distance factor) + (passengers * 10)
 ```
 
-**Day Trips:**
+**Day Trip Endpoint (/api/daytrip-price):**
 ```
 price = (100 * days) + (passengers * 15)
 ```
