@@ -465,41 +465,41 @@ const ratelimit = new Ratelimit({
 });
 
 export async function middleware(request: NextRequest) {
-  // Only apply to API routes
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    const ip = request.ip ?? '127.0.0.1';
-    const { success, limit, remaining, reset } = await ratelimit.limit(ip);
+  const ip = request.ip ?? '127.0.0.1';
+  const { success, limit, remaining, reset } = await ratelimit.limit(ip);
 
-    if (!success) {
-      return NextResponse.json(
-        {
-          error: 'Rate limit exceeded',
-          details: 'Too many requests. Please try again later.',
+  if (!success) {
+    return NextResponse.json(
+      {
+        error: 'Rate limit exceeded',
+        details: 'Too many requests. Please try again later.',
+      },
+      {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': limit.toString(),
+          'X-RateLimit-Remaining': remaining.toString(),
+          'X-RateLimit-Reset': reset.toString(),
         },
-        {
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': limit.toString(),
-            'X-RateLimit-Remaining': remaining.toString(),
-            'X-RateLimit-Reset': reset.toString(),
-          },
-        }
-      );
-    }
-
-    // Add rate limit headers to successful responses
-    const response = NextResponse.next();
-    response.headers.set('X-RateLimit-Limit', limit.toString());
-    response.headers.set('X-RateLimit-Remaining', remaining.toString());
-    response.headers.set('X-RateLimit-Reset', reset.toString());
-    return response;
+      }
+    );
   }
 
-  return NextResponse.next();
+  // Add rate limit headers to successful responses
+  const response = NextResponse.next();
+  response.headers.set('X-RateLimit-Limit', limit.toString());
+  response.headers.set('X-RateLimit-Remaining', remaining.toString());
+  response.headers.set('X-RateLimit-Reset', reset.toString());
+  return response;
 }
 
 export const config = {
-  matcher: '/api/:path*',
+  // Only apply rate limiting to POST endpoints (computational/expensive)
+  // GET endpoints serve static/cacheable data and don't need rate limiting
+  matcher: [
+    '/api/transfer-price',
+    '/api/daytrip-price',
+  ],
 };
 ```
 
@@ -545,29 +545,56 @@ X-RateLimit-Remaining: 87
 X-RateLimit-Reset: 1711900800
 ```
 
-### Different Limits Per Endpoint (Advanced)
+### Alternative: Different Limits Per Endpoint Type
 
-You can configure different limits for different endpoints:
+If you want to protect GET endpoints with more permissive limits:
 
 ```typescript
-const transferPriceLimit = new Ratelimit({
+export async function middleware(request: NextRequest) {
+  const ip = request.ip ?? '127.0.0.1';
+  const path = request.nextUrl.pathname;
+  
+  // Strict limit for POST endpoints
+  if (path.startsWith('/api/transfer-price') || path.startsWith('/api/daytrip-price')) {
+    const { success, limit, remaining, reset } = await strictRatelimit.limit(ip);
+    // ... handle rate limit
+  }
+  
+  // Permissive limit for GET endpoints (optional)
+  else if (path.startsWith('/api/')) {
+    const { success, limit, remaining, reset } = await permissiveRatelimit.limit(ip);
+    // ... handle rate limit
+  }
+}
+
+// Configure separate rate limiters
+const strictRatelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(50, '1 h'), // More restrictive
+  limiter: Ratelimit.slidingWindow(50, '1 h'),
 });
 
-const locationsLimit = new Ratelimit({
+const permissiveRatelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(200, '1 h'), // More permissive
+  limiter: Ratelimit.slidingWindow(500, '1 h'),
 });
 ```
 
 ### Recommended Limits for This Project
 
-- **GET /api/locations** - 200 requests/hour (mostly static data)
-- **GET /api/service-locations** - 200 requests/hour (mostly static data)
-- **GET /api/day-trips** - 200 requests/hour (mostly static data)
-- **POST /api/transfer-price** - 50 requests/hour (computational)
-- **POST /api/daytrip-price** - 50 requests/hour (computational)
+**Rate Limited Endpoints:**
+- **POST /api/transfer-price** - 50-100 requests/hour (computational, special request handling)
+- **POST /api/daytrip-price** - 50-100 requests/hour (computational)
+
+**Excluded from Rate Limiting (Recommended):**
+- **GET /api/locations** - Static data, should be cached by client/CDN
+- **GET /api/service-locations** - Static data, should be cached by client/CDN
+- **GET /api/day-trips** - Static data, should be cached by client/CDN
+
+**Rationale:**
+- GET endpoints return static, cacheable data that changes infrequently
+- No computational cost or abuse risk
+- Better user experience (no artificial limits on reference data)
+- POST endpoints perform calculations and may eventually store data (abuse risk)
 
 ### Testing Rate Limits
 
