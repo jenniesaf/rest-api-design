@@ -75,6 +75,11 @@ See [PLAN.md](./PLAN.md) for the full milestone breakdown and rationale.
 
 ---
 
+# Code Review & Quality Standards
+For detailed code review guidelines, TypeScript best practices, and quality standards, see [CODE_REVIEW_GUIDELINES.md](./CODE_REVIEW_GUIDELINES.md).
+
+---
+
 # Do Not
 - Store secrets in code (use environment variables)
 - Commit without running typecheck and tests

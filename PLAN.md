@@ -86,6 +86,8 @@ This document records the initial project plan, milestones, and rationale for th
 8. **Verification & Best Practices** (Ongoing)
    - Check folder structure, commit format, test-first development, no secrets in code, env usage
    - Code reviews and refactoring
+   - Follow code review guidelines (see [CODE_REVIEW_GUIDELINES.md](./CODE_REVIEW_GUIDELINES.md))
+   - Enforce TypeScript, React/Next.js, and functional programming standards
 
 ---
 
