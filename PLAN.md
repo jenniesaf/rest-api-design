@@ -19,6 +19,7 @@ This document records the initial project plan, milestones, and rationale for th
    - Set up Next.js 16, Tailwind CSS, Shadcn/UI, Prisma
    - Initialize git, .gitignore, .env.local
    - Add project description to README.md
+   - Set up commitlint + husky for Conventional Commits enforcement (see [CONVENTIONAL_COMMITS_SETUP.md](./CONVENTIONAL_COMMITS_SETUP.md))
 
 2. **Documentation** ✅
    - Create comprehensive README.md (onboarding, code style, workflow, folder structure, learning protocol)
@@ -46,7 +47,7 @@ This document records the initial project plan, milestones, and rationale for th
    - Implement business logic (seasonal minimums, standard routes)
    - Document rate limiting strategy (middleware pattern)
 
-5. **Testing & SDD Workflow** (In Progress)
+5. **Testing & SDD Workflow** ✅
    - Set up testing infrastructure (Jest/Vitest)
    - Write tests before feature logic (happy path + edge cases)
    - Test all API endpoints:
@@ -76,7 +77,7 @@ This document records the initial project plan, milestones, and rationale for th
    - Use Shadcn/UI components (Form, Select, Input, Button, etc.)
    - Follow Jennie's code style (RTL, logical properties)
 
-7. **Commit & CI/CD Setup** (Planned)
+7. **Commit & CI/CD Setup** ✅
    - Enforce Conventional Commits (commitlint/husky)
    - Add scripts for typecheck and tests pre-commit
    - Configure GitHub Actions for CI/CD

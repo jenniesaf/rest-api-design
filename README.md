@@ -48,6 +48,8 @@ See [PLAN.md](./PLAN.md) for the full milestone breakdown and rationale.
   - `test`: Adding missing tests or correcting existing tests.
   - `chore`: Changes to the build process or auxiliary tools and libraries.
 - **Example:** `feat(logic): implement happy-path return for todo validation`
+- **Commit Enforcement:** This project uses commitlint + husky to enforce Conventional Commits from the start. See [CONVENTIONAL_COMMITS_SETUP.md](./CONVENTIONAL_COMMITS_SETUP.md) for setup and usage details.
+- **CI/CD:** GitHub Actions automatically runs type checks, linting, tests, and builds on every push and PR. See [CI_CD_SETUP.md](./CI_CD_SETUP.md) for details.
 
 ## Testing Philosophy
 
