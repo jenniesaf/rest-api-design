@@ -166,15 +166,23 @@ This document describes the REST API endpoints for the Montenegro Trip Calculato
 
 **Request Type:**
 ```typescript
-{
-  serviceType: "transfer" | "dayTrip";
+type TransferRequest = {
+  serviceType: "transfer";
   date: string; // ISO 8601 format (YYYY-MM-DD)
-  days?: number; // Required if serviceType is "dayTrip"
   passengers: number;
-  start: string; // Required if serviceType is "transfer"
-  end: string; // Required if serviceType is "transfer"
-  tripId?: string; // Optional, for dayTrip selection
-}
+  start: string;
+  end: string;
+};
+
+type DayTripRequest = {
+  serviceType: "dayTrip";
+  date: string; // ISO 8601 format (YYYY-MM-DD)
+  days: number;
+  passengers: number;
+  tripId: string;
+};
+
+type CalculatePriceRequest = TransferRequest | DayTripRequest;
 ```
 
 **Validation Rules:**

@@ -5,15 +5,23 @@ import {
   getMinimumPassengers,
 } from "@/utils/calculator-data";
 
-interface CalculatePriceRequest {
-  serviceType: "transfer" | "dayTrip";
+type TransferRequest = {
+  serviceType: "transfer";
   date: string;
-  days?: number;
   passengers: number;
   start: string;
   end: string;
-  tripId?: string;
-}
+};
+
+type DayTripRequest = {
+  serviceType: "dayTrip";
+  date: string;
+  days: number;
+  passengers: number;
+  tripId: string;
+};
+
+type CalculatePriceRequest = TransferRequest | DayTripRequest;
 
 export async function POST(request: NextRequest) {
   try {
