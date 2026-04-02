@@ -15,38 +15,76 @@ This document records the initial project plan, milestones, and rationale for th
 
 ## Milestones
 
-1. **Project Initialization**
+1. **Project Initialization** ✅
    - Set up Next.js 16, Tailwind CSS, Shadcn/UI, Prisma
    - Initialize git, .gitignore, .env.local
    - Add project description to README.md
 
-2. **Documentation**
+2. **Documentation** ✅
    - Create comprehensive README.md (onboarding, code style, workflow, folder structure, learning protocol)
-   - Reference PLAN.md in README.md and vice versa
+   - Create PLAN.md for project vision and milestones
+   - Create API-CALCULATOR-REQUIREMENTS.md for business requirements
+   - Create API-DOCUMENTATION.md for endpoint specifications
 
-3. **Folder Structure Setup**
+3. **Folder Structure Setup** ✅
    - Implement fractal, layered folder structure:
      - /src/api, /src/database, /src/components, /src/utils, /src/assets, /src/hooks, /src/services (Shared Layer)
      - /src/features (Features Layer, with subfolders for each feature)
      - /src/app (App Layer)
    - Add placeholder README.md in each major folder
 
-4. **Mock API Integration**
-   - Set up /src/api routes to proxy/mock data from jsonplaceholder.typicode.com
-   - Document endpoints in README.md
+4. **API Implementation** ✅
+   - Define calculator data constants (locations, service locations, day trips)
+   - Implement GET endpoints:
+     - GET /api/locations
+     - GET /api/service-locations
+     - GET /api/day-trips
+   - Implement POST endpoints:
+     - POST /api/transfer-price (with special request handling)
+     - POST /api/daytrip-price
+   - Add strict validation with discriminated union types
+   - Implement business logic (seasonal minimums, standard routes)
+   - Document rate limiting strategy (middleware pattern)
 
-5. **Testing & SDD Workflow**
+5. **Testing & SDD Workflow** (In Progress)
+   - Set up testing infrastructure (Jest/Vitest)
    - Write tests before feature logic (happy path + edge cases)
+   - Test all API endpoints:
+     - GET endpoints (locations, service-locations, day-trips)
+     - POST endpoints (transfer-price, daytrip-price)
+     - Validation logic
+     - Business logic (route checking, seasonal minimums, price calculations)
    - Use SDD: tests → minimal implementation → refactor
    - Document process and examples in README.md
 
-6. **Commit & CI/CD Setup**
+6. **Frontend UI Implementation** (Planned)
+   - Create calculator feature module in /src/features/calculator
+   - Build calculator form component:
+     - Service type selector (Transfer/Day Trip)
+     - Date picker with validation
+     - Passenger input with seasonal minimums
+     - Location dropdowns (integrated with GET /api/locations)
+     - Days input (for day trips)
+     - Trip selector (for day trips)
+   - Integrate with API endpoints:
+     - Fetch locations/trips on component mount
+     - Submit to POST /api/transfer-price or /api/daytrip-price
+     - Display price results
+     - Handle special request flow (show contact form)
+   - Error handling and user feedback
+   - Responsive design with Tailwind CSS
+   - Use Shadcn/UI components (Form, Select, Input, Button, etc.)
+   - Follow Jennie's code style (RTL, logical properties)
+
+7. **Commit & CI/CD Setup** (Planned)
    - Enforce Conventional Commits (commitlint/husky)
    - Add scripts for typecheck and tests pre-commit
+   - Configure GitHub Actions for CI/CD
    - Document workflow in README.md
 
-7. **Verification & Best Practices**
+8. **Verification & Best Practices** (Ongoing)
    - Check folder structure, commit format, test-first development, no secrets in code, env usage
+   - Code reviews and refactoring
 
 ---
 
