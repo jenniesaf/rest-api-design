@@ -60,9 +60,19 @@ export async function POST(request: NextRequest) {
     const passengerFactor = body.passengers * 15;
     const mockPrice = basePricePerDay * body.days + passengerFactor;
 
+    // Determine season
+    const dateObj = new Date(body.date);
+    const month = dateObj.getMonth() + 1; // 1-based
+    const day = dateObj.getDate();
+    const isPeakSeason = 
+      (month === 4 && day >= 1) ||
+      (month > 4 && month < 10) ||
+      (month === 10 && day <= 31);
+
     return NextResponse.json({
       price: mockPrice,
       currency: "EUR",
+      season: isPeakSeason ? "peak" : "off",
       details: `Day trip for ${body.days} day(s) with ${body.passengers} passenger(s)`,
       tripId: body.tripId,
     });
