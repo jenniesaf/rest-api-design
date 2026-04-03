@@ -58,7 +58,7 @@ This document records the initial project plan, milestones, and rationale for th
    - Use SDD: tests → minimal implementation → refactor
    - Document process and examples in README.md
 
-6. **Frontend UI Implementation** (Planned)
+6. **Frontend UI Implementation** ✅
    - Create calculator feature module in /src/features/calculator
    - Build calculator form component:
      - Service type selector (Transfer/Day Trip)

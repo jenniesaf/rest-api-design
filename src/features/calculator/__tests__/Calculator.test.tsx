@@ -189,6 +189,7 @@ describe('Calculator Component', () => {
       });
     });
 
+    // TODO: Fix async timing issues with form validation error display
     it.skip('should show error when passengers is missing', async () => {
       const user = userEvent.setup();
       render(<Calculator />);
@@ -204,7 +205,7 @@ describe('Calculator Component', () => {
       await user.selectOptions(screen.getByLabelText(/from/i), 'Dubrovnik');
       await user.selectOptions(screen.getByLabelText(/to/i), 'Cavtat');
       
-      // Clear passengers field
+      // Clear passengers field to trigger validation
       await user.clear(screen.getByLabelText(/passengers/i));
       await user.click(screen.getByRole('button', { name: /calculate price/i }));
 
@@ -213,6 +214,7 @@ describe('Calculator Component', () => {
       });
     });
 
+    // TODO: Fix async timing issues with form validation error display
     it.skip('should show error when passengers is less than 1', async () => {
       const user = userEvent.setup();
       render(<Calculator />);
@@ -229,8 +231,9 @@ describe('Calculator Component', () => {
       await user.selectOptions(screen.getByLabelText(/to/i), 'Cavtat');
       
       // Set passengers to 0
-      await user.clear(screen.getByLabelText(/passengers/i));
-      await user.type(screen.getByLabelText(/passengers/i), '0');
+      const passengersInput = screen.getByLabelText(/passengers/i);
+      await user.clear(passengersInput);
+      await user.type(passengersInput, '0');
       await user.click(screen.getByRole('button', { name: /calculate price/i }));
 
       await waitFor(() => {
@@ -240,10 +243,11 @@ describe('Calculator Component', () => {
   });
 
   describe('Special Requests', () => {
+    // TODO: Fix async timing issues with special request response handling
     it.skip('should display special request message when returned from API', async () => {
       const user = userEvent.setup();
       const mockResponse = {
-        isSpecialRequest: true,
+        specialRequest: true,
         message: 'This route requires a special request. Please contact us.',
       };
 
@@ -274,8 +278,9 @@ describe('Calculator Component', () => {
 
       await user.selectOptions(screen.getByLabelText(/service type/i), 'transfer');
       await user.type(screen.getByLabelText(/date/i), '2024-07-15');
-      await user.clear(screen.getByLabelText(/passengers/i));
-      await user.type(screen.getByLabelText(/passengers/i), '4');
+      const passengersInput = screen.getByLabelText(/passengers/i);
+      await user.clear(passengersInput);
+      await user.type(passengersInput, '4');
       
       // Wait for locations to load
       await waitFor(() => {
@@ -294,6 +299,7 @@ describe('Calculator Component', () => {
   });
 
   describe('API Error Handling', () => {
+    // TODO: Fix async timing issues with API error response handling
     it.skip('should display error message when API returns 400', async () => {
       const user = userEvent.setup();
       const mockError = {
@@ -329,8 +335,9 @@ describe('Calculator Component', () => {
 
       await user.selectOptions(screen.getByLabelText(/service type/i), 'transfer');
       await user.type(screen.getByLabelText(/date/i), 'invalid-date');
-      await user.clear(screen.getByLabelText(/passengers/i));
-      await user.type(screen.getByLabelText(/passengers/i), '4');
+      const passengersInput = screen.getByLabelText(/passengers/i);
+      await user.clear(passengersInput);
+      await user.type(passengersInput, '4');
       
       // Wait for locations to load
       await waitFor(() => {
