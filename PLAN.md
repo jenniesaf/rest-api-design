@@ -88,7 +88,36 @@ This document records the initial project plan, milestones, and rationale for th
    - Code reviews and refactoring
    - Follow code review guidelines (see [CODE_REVIEW_GUIDELINES.md](./CODE_REVIEW_GUIDELINES.md))
    - Enforce TypeScript, React/Next.js, and functional programming standards
-
+   
+9. **Booking/Contact Form with Progressive Disclosure** (In Progress)
+   - Add contact/booking form that appears after users see price result
+   - Progressive disclosure pattern: Result → Button → Form → Submit → Thank You
+   - Same flow for both special requests and regular prices
+   
+   **Phase 1: Types & State Management**
+   - Create contact form types in `src/features/calculator/types/index.ts`:
+     - `ContactFormData` (name, email, phone, message)
+     - `ContactFormErrors` (field-specific errors with `?`)
+     - `BookingStatus` ('idle' | 'form-visible' | 'submitting' | 'success' | 'error')
+   - Add state to Calculator component: `bookingStatus`, `contactFormData`, `contactErrors`
+   
+   **Phase 2: UI Components**
+   - Add "Book Now" / "Request Quote" button to result display
+   - Create contact form section (Name, Email, Phone, Message optional)
+   - Inline field errors matching calculator form pattern
+   - Create thank you message with "Start New Calculation" button
+   
+   **Phase 3: Validation & API**
+   - Implement contact form validation (email format, phone format)
+   - Create `/api/booking` endpoint (POST)
+   - Validate input, save booking data, send notifications
+   - Handle success/error responses
+   
+   **Files to modify/create:**
+   - `src/features/calculator/types/index.ts` — Add new types
+   - `src/features/calculator/components/Calculator.tsx` — Add booking UI and logic
+   - `src/app/api/booking/route.ts` — NEW endpoint
+   - `src/app/api/booking/__tests__/route.test.ts` — NEW tests
 ---
 
 ## Rationale
