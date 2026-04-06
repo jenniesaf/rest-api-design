@@ -148,7 +148,7 @@ export function Calculator() {
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <h1 className="text-3xl font-bold mb-6 text-gray-900">Trip Price Calculator</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {/* Service Type */}
         <div>
           <label htmlFor="serviceType" className="block text-sm font-medium mb-2 text-gray-700">

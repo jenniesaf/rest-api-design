@@ -197,8 +197,7 @@ describe('Calculator Component', () => {
       });
     });
 
-    // TODO: Fix async timing issues with form validation error display
-    it.skip('should show error when passengers is missing', async () => {
+    it('should show error when passengers field is cleared', async () => {
       const user = userEvent.setup();
       render(<Calculator />);
 
@@ -213,17 +212,16 @@ describe('Calculator Component', () => {
       await user.selectOptions(screen.getByLabelText(/from/i), 'Dubrovnik');
       await user.selectOptions(screen.getByLabelText(/to/i), 'Cavtat');
       
-      // Clear passengers field to trigger validation
+      // Clear passengers field (becomes 0)
       await user.clear(screen.getByLabelText(/passengers/i));
       await user.click(screen.getByRole('button', { name: /calculate price/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/passengers is required/i)).toBeInTheDocument();
+        expect(screen.getByText(/passengers must be at least 1/i)).toBeInTheDocument();
       });
     });
 
-    // TODO: Fix async timing issues with form validation error display
-    it.skip('should show error when passengers is less than 1', async () => {
+    it('should show error when passengers is 0', async () => {
       const user = userEvent.setup();
       render(<Calculator />);
 
@@ -251,8 +249,7 @@ describe('Calculator Component', () => {
   });
 
   describe('Special Requests', () => {
-    // TODO: Fix async timing issues with special request response handling
-    it.skip('should display special request message when returned from API', async () => {
+    it('should display special request message when returned from API', async () => {
       const user = userEvent.setup();
       const mockResponse = {
         specialRequest: true,
@@ -300,19 +297,19 @@ describe('Calculator Component', () => {
       await user.click(screen.getByRole('button', { name: /calculate price/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/special request/i)).toBeInTheDocument();
-        expect(screen.getByText(/contact us/i)).toBeInTheDocument();
+        // Check that the API message is displayed
+        expect(screen.getByText(/this route requires a special request/i)).toBeInTheDocument();
+        expect(screen.getByText(/please contact us for pricing/i)).toBeInTheDocument();
       });
     });
   });
 
   describe('API Error Handling', () => {
-    // TODO: Fix async timing issues with API error response handling
-    it.skip('should display error message when API returns 400', async () => {
+    it('should display error message when API returns 400', async () => {
       const user = userEvent.setup();
       const mockError = {
         error: 'Validation failed',
-        details: ['Invalid date format'],
+        details: ['Minimum 4 passengers required for the selected date (season)'],
       };
 
       // Override fetch mock for this test
@@ -342,10 +339,10 @@ describe('Calculator Component', () => {
       render(<Calculator />);
 
       await user.selectOptions(screen.getByLabelText(/service type/i), 'transfer');
-      await user.type(screen.getByLabelText(/date/i), 'invalid-date');
+      await user.type(screen.getByLabelText(/date/i), '2024-07-15');
       const passengersInput = screen.getByLabelText(/passengers/i);
       await user.clear(passengersInput);
-      await user.type(passengersInput, '4');
+      await user.type(passengersInput, '2'); // Only 2 passengers in peak season (needs 4)
       
       // Wait for locations to load
       await waitFor(() => {
@@ -357,7 +354,7 @@ describe('Calculator Component', () => {
       await user.click(screen.getByRole('button', { name: /calculate price/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/invalid date format/i)).toBeInTheDocument();
+        expect(screen.getByText(/minimum 4 passengers required/i)).toBeInTheDocument();
       });
     });
 
