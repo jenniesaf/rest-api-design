@@ -27,7 +27,7 @@ describe('GET /api/day-trips', () => {
       const response = await GET();
       const data = await response.json();
       
-      data.dayTrips.forEach((trip: any) => {
+      data.dayTrips.forEach((trip: { id: string; name: string; description: string }) => {
         expect(trip).toHaveProperty('id');
         expect(trip).toHaveProperty('name');
         expect(trip).toHaveProperty('description');
@@ -38,7 +38,7 @@ describe('GET /api/day-trips', () => {
       const response = await GET();
       const data = await response.json();
       
-      const ids = data.dayTrips.map((trip: any) => trip.id);
+      const ids = data.dayTrips.map((trip: { id: string }) => trip.id);
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(5);
     });

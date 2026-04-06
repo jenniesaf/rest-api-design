@@ -11,7 +11,7 @@ describe('Calculator Component', () => {
     vi.clearAllMocks();
     
     // Mock initial data fetch for locations and trips
-    (global.fetch as any).mockImplementation((url: string) => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementation((url: string) => {
       if (url === '/api/locations') {
         return Promise.resolve({
           ok: true,

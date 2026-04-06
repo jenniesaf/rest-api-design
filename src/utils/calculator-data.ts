@@ -136,7 +136,7 @@ export function isStandardTransferRoute(start: string, end: string): boolean {
   
   const isPodgoricaStart = podgoricaLocations.includes(start);
   const isPodgoricaEnd = podgoricaLocations.includes(end);
-  const isServiceLocation = (loc: string) => SERVICE_LOCATIONS.includes(loc as any);
+  const isServiceLocation = (loc: string) => SERVICE_LOCATIONS.includes(loc as (typeof SERVICE_LOCATIONS)[number]);
   
   return (isPodgoricaStart && isServiceLocation(end)) || (isPodgoricaEnd && isServiceLocation(start));
 }

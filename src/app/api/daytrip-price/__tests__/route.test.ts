@@ -3,7 +3,7 @@ import { POST } from '../route';
 import { NextRequest } from 'next/server';
 
 // Helper function to create mock request
-function createRequest(body: any): NextRequest {
+function createRequest(body: unknown): NextRequest {
   return new NextRequest('http://localhost:3000/api/daytrip-price', {
     method: 'POST',
     body: JSON.stringify(body),

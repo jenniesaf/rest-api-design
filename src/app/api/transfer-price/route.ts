@@ -43,13 +43,13 @@ export async function POST(request: NextRequest) {
 
     if (!body.start) {
       errors.push("start location is required");
-    } else if (!ALL_LOCATIONS.includes(body.start as any)) {
+    } else if (!ALL_LOCATIONS.includes(body.start as (typeof ALL_LOCATIONS)[number])) {
       errors.push("start location is not valid");
     }
 
     if (!body.end) {
       errors.push("end location is required");
-    } else if (!ALL_LOCATIONS.includes(body.end as any)) {
+    } else if (!ALL_LOCATIONS.includes(body.end as (typeof ALL_LOCATIONS)[number])) {
       errors.push("end location is not valid");
     }
 
