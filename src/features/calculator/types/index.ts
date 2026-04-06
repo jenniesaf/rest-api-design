@@ -26,6 +26,15 @@ export type SpecialRequestResult = {
 
 export type CalculatorResult = PriceResult | SpecialRequestResult;
 
+export type CalculatorFieldErrors = {
+  date?: string;
+  passengers?: string;
+  from?: string;
+  to?: string;
+  days?: string;
+  trip?: string;
+};
+
 export type CalculatorState = {
   formData: CalculatorFormData;
   result: CalculatorResult | null;

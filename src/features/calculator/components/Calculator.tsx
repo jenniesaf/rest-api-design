@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { ServiceType, CalculatorFormData, CalculatorResult } from "../types";
+import type { ServiceType, CalculatorFormData, CalculatorResult, CalculatorFieldErrors } from "../types";
 
 type DayTrip = {
   id: string;
@@ -17,7 +17,8 @@ export function Calculator() {
   });
   const [result, setResult] = useState<CalculatorResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<CalculatorFieldErrors>({});
+  const [apiError, setApiError] = useState<string | null>(null);
   const [locations, setLocations] = useState<string[]>([]);
   const [trips, setTrips] = useState<DayTrip[]>([]);
 
@@ -48,27 +49,27 @@ export function Calculator() {
     fetchData();
   }, []);
 
-  const validateForm = (): string[] => {
-    const errors: string[] = [];
+  const validateForm = (): CalculatorFieldErrors => {
+    const errors: CalculatorFieldErrors = {};
 
     if (!formData.date) {
-      errors.push("Date is required");
+      errors.date = "Date is required";
     }
 
     if (formData.passengers === undefined || formData.passengers === null || isNaN(formData.passengers)) {
-      errors.push("Passengers is required");
+      errors.passengers = "Passengers is required";
     } else if (formData.passengers < 1) {
-      errors.push("Passengers must be at least 1");
+      errors.passengers = "Passengers must be at least 1";
     }
 
     if (formData.serviceType === "transfer") {
-      if (!formData.from) errors.push("From location is required");
-      if (!formData.to) errors.push("To location is required");
+      if (!formData.from) errors.from = "From location is required";
+      if (!formData.to) errors.to = "To location is required";
     }
 
     if (formData.serviceType === "daytrip") {
-      if (!formData.days) errors.push("Days is required");
-      if (!formData.trip) errors.push("Trip is required");
+      if (!formData.days) errors.days = "Days is required";
+      if (!formData.trip) errors.trip = "Trip is required";
     }
 
     return errors;
@@ -76,12 +77,13 @@ export function Calculator() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    setFieldErrors({});
+    setApiError(null);
     setResult(null);
 
     const validationErrors = validateForm();
-    if (validationErrors.length > 0) {
-      setError(validationErrors.join(", "));
+    if (Object.keys(validationErrors).length > 0) {
+      setFieldErrors(validationErrors);
       return;
     }
 
@@ -119,16 +121,16 @@ export function Calculator() {
 
       if (!response.ok) {
         if (data.details && Array.isArray(data.details)) {
-          setError(data.details.join(", "));
+          setApiError(data.details.join(", "));
         } else {
-          setError(data.error || "An error occurred");
+          setApiError(data.error || "An error occurred");
         }
         return;
       }
 
       setResult(data);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setApiError("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +143,8 @@ export function Calculator() {
       passengers: formData.passengers,
     });
     setResult(null);
-    setError(null);
+    setFieldErrors({});
+    setApiError(null);
   };
 
   return (
@@ -177,6 +180,9 @@ export function Calculator() {
             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
             className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
+          {fieldErrors.date && (
+            <p className="mt-1 text-sm text-red-600">{fieldErrors.date}</p>
+          )}
         </div>
 
         {/* Passengers */}
@@ -194,6 +200,9 @@ export function Calculator() {
             }
             className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
+          {fieldErrors.passengers && (
+            <p className="mt-1 text-sm text-red-600">{fieldErrors.passengers}</p>
+          )}
         </div>
 
         {/* Transfer-specific fields */}
@@ -216,6 +225,9 @@ export function Calculator() {
                   </option>
                 ))}
               </select>
+              {fieldErrors.from && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.from}</p>
+              )}
             </div>
 
             <div>
@@ -235,6 +247,9 @@ export function Calculator() {
                   </option>
                 ))}
               </select>
+              {fieldErrors.to && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.to}</p>
+              )}
             </div>
           </>
         )}
@@ -256,6 +271,9 @@ export function Calculator() {
                 }
                 className="w-full p-2 border border-gray-300 rounded bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
+              {fieldErrors.days && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.days}</p>
+              )}
             </div>
 
             <div>
@@ -275,6 +293,9 @@ export function Calculator() {
                   </option>
                 ))}
               </select>
+              {fieldErrors.trip && (
+                <p className="mt-1 text-sm text-red-600">{fieldErrors.trip}</p>
+              )}
             </div>
           </>
         )}
@@ -289,10 +310,10 @@ export function Calculator() {
         </button>
       </form>
 
-      {/* Error Display */}
-      {error && (
+      {/* API Error Display */}
+      {apiError && (
         <div className="mt-6 p-4 bg-red-50 border border-red-300 rounded-lg">
-          <p className="text-red-800 font-medium">{error}</p>
+          <p className="text-red-800 font-medium">{apiError}</p>
         </div>
       )}
 
