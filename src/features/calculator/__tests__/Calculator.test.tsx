@@ -24,7 +24,11 @@ describe('Calculator Component', () => {
         return Promise.resolve({
           ok: true,
           json: async () => ({
-            trips: ['Montenegro Tour', 'Mostar Tour', 'Split City Tour'],
+            dayTrips: [
+              { id: 'day-trip-1', name: 'Montenegro Tour', description: 'Tour of Montenegro' },
+              { id: 'day-trip-2', name: 'Mostar Tour', description: 'Tour of Mostar' },
+              { id: 'day-trip-3', name: 'Split City Tour', description: 'Tour of Split' },
+            ],
           }),
         });
       }
@@ -87,7 +91,7 @@ describe('Calculator Component', () => {
         if (url === '/api/day-trips') {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ trips: [] }),
+            json: async () => ({ dayTrips: [] }),
           });
         }
         if (url === '/api/transfer-price' && options?.method === 'POST') {
@@ -140,7 +144,11 @@ describe('Calculator Component', () => {
         if (url === '/api/day-trips') {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ trips: ['Montenegro Tour'] }),
+            json: async () => ({ 
+              dayTrips: [
+                { id: 'day-trip-1', name: 'Montenegro Tour', description: 'Tour of Montenegro' },
+              ],
+            }),
           });
         }
         if (url === '/api/daytrip-price' && options?.method === 'POST') {
@@ -165,7 +173,7 @@ describe('Calculator Component', () => {
       });
       
       await user.type(screen.getByLabelText(/days/i), '3');
-      await user.selectOptions(screen.getByLabelText(/trip/i), 'Montenegro Tour');
+      await user.selectOptions(screen.getByLabelText(/trip/i), 'day-trip-1');
       await user.click(screen.getByRole('button', { name: /calculate price/i }));
 
       await waitFor(() => {
@@ -262,7 +270,7 @@ describe('Calculator Component', () => {
         if (url === '/api/day-trips') {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ trips: [] }),
+            json: async () => ({ dayTrips: [] }),
           });
         }
         if (url === '/api/transfer-price' && options?.method === 'POST') {
@@ -318,7 +326,7 @@ describe('Calculator Component', () => {
         if (url === '/api/day-trips') {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ trips: [] }),
+            json: async () => ({ dayTrips: [] }),
           });
         }
         if (url === '/api/transfer-price' && options?.method === 'POST') {
@@ -367,7 +375,7 @@ describe('Calculator Component', () => {
         if (url === '/api/day-trips') {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ trips: [] }),
+            json: async () => ({ dayTrips: [] }),
           });
         }
         if (url === '/api/transfer-price' && options?.method === 'POST') {
@@ -413,7 +421,7 @@ describe('Calculator Component', () => {
         if (url === '/api/day-trips') {
           return Promise.resolve({
             ok: true,
-            json: async () => ({ trips: [] }),
+            json: async () => ({ dayTrips: [] }),
           });
         }
         if (url === '/api/transfer-price' && options?.method === 'POST') {
@@ -456,3 +464,4 @@ describe('Calculator Component', () => {
     });
   });
 });
+

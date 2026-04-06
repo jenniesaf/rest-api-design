@@ -55,10 +55,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if special request is needed for large groups
+    if (body.passengers > 8) {
+      return NextResponse.json({
+        specialRequest: true,
+        message:
+          "Groups with more than 8 passengers require a special request. Please provide your contact information and we will get back to you with a customized offer.",
+      });
+    }
+
     // Mock price calculation for day trips
-    const basePricePerDay = 100;
-    const passengerFactor = body.passengers * 15;
-    const mockPrice = basePricePerDay * body.days + passengerFactor;
+    let basePrice: number;
+    if (body.passengers <= 3) {
+      basePrice = 250;
+    } else if (body.passengers === 4) {
+      basePrice = 400;
+    } else if (body.passengers >= 5 && body.passengers <= 6) {
+      basePrice = 450;
+    } else {
+      // 7-8 passengers (we already returned for > 8)
+      basePrice = 480;
+    }
+    const mockPrice = basePrice * body.days;
 
     // Determine season
     const dateObj = new Date(body.date);

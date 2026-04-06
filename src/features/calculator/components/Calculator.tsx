@@ -3,17 +3,23 @@
 import { useState, useEffect } from "react";
 import type { ServiceType, CalculatorFormData, CalculatorResult } from "../types";
 
+type DayTrip = {
+  id: string;
+  name: string;
+  description: string;
+};
+
 export function Calculator() {
   const [formData, setFormData] = useState<CalculatorFormData>({
     serviceType: "transfer",
     date: "",
-    passengers: 1,
+    passengers: 2,
   });
   const [result, setResult] = useState<CalculatorResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [locations, setLocations] = useState<string[]>([]);
-  const [trips, setTrips] = useState<string[]>([]);
+  const [trips, setTrips] = useState<DayTrip[]>([]);
 
   // Fetch locations and trips on mount
   useEffect(() => {
@@ -31,7 +37,7 @@ export function Calculator() {
 
         if (tripsRes && tripsRes.ok) {
           const tripsData = await tripsRes.json();
-          setTrips(tripsData.trips || []);
+          setTrips(tripsData.dayTrips || []);
         }
       } catch (err) {
         // Silent fail for initial data fetch
@@ -264,8 +270,8 @@ export function Calculator() {
               >
                 <option value="">Select trip</option>
                 {trips.map((trip) => (
-                  <option key={trip} value={trip}>
-                    {trip}
+                  <option key={trip.id} value={trip.id}>
+                    {trip.name}
                   </option>
                 ))}
               </select>
