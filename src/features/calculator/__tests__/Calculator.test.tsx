@@ -81,7 +81,7 @@ describe('Calculator Component', () => {
       };
 
       // Override fetch mock for this test
-      (global.fetch as any).mockImplementation((url: string, options?: any) => {
+      (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         if (url === '/api/locations') {
           return Promise.resolve({
             ok: true,
@@ -134,7 +134,7 @@ describe('Calculator Component', () => {
       };
 
       // Override fetch mock for this test
-      (global.fetch as any).mockImplementation((url: string, options?: any) => {
+      (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         if (url === '/api/locations') {
           return Promise.resolve({
             ok: true,
@@ -257,7 +257,7 @@ describe('Calculator Component', () => {
       };
 
       // Override fetch mock for this test
-      (global.fetch as any).mockImplementation((url: string, options?: any) => {
+      (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         if (url === '/api/locations') {
           return Promise.resolve({
             ok: true,
@@ -313,7 +313,7 @@ describe('Calculator Component', () => {
       };
 
       // Override fetch mock for this test
-      (global.fetch as any).mockImplementation((url: string, options?: any) => {
+      (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         if (url === '/api/locations') {
           return Promise.resolve({
             ok: true,
@@ -362,7 +362,7 @@ describe('Calculator Component', () => {
       const user = userEvent.setup();
 
       // Override fetch mock for this test
-      (global.fetch as any).mockImplementation((url: string, options?: any) => {
+      (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         if (url === '/api/locations') {
           return Promise.resolve({
             ok: true,
@@ -408,7 +408,7 @@ describe('Calculator Component', () => {
       const user = userEvent.setup();
 
       // Override fetch mock for this test
-      (global.fetch as any).mockImplementation((url: string, options?: any) => {
+      (global.fetch as any).mockImplementation((url: string, options?: RequestInit) => {
         if (url === '/api/locations') {
           return Promise.resolve({
             ok: true,
@@ -461,4 +461,5 @@ describe('Calculator Component', () => {
     });
   });
 });
+
 
